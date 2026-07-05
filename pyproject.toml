@@ -1,0 +1,17 @@
+[project]
+name = "telemetry-api"
+version = "0.1.0"
+description = "Satellite Telemetry REST API backend"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.139.0",
+    "peewee>=4.1.1",
+    "uvicorn>=0.50.0",
+]
+
+[dependency-groups]
+dev = [
+    "httpx>=0.28.1",
+    "pytest>=9.1.1",
+]

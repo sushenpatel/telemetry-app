@@ -1,0 +1,12 @@
+services:
+  telemetry-api:
+    build: .
+    container_name: telemetry-api
+    ports:
+      - "8000:8000"
+    volumes:
+      - telemetry-data:/app/src  # persists the SQLite file across restarts
+    restart: unless-stopped
+
+volumes:
+  telemetry-data:
