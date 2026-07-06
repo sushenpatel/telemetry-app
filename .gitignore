@@ -14,7 +14,3 @@ wheels/
 node_modules/
 .pnp
 .pnp.js
-
-# Production build outputs
-dist/
-build/
