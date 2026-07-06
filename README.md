@@ -1,12 +1,16 @@
 # Satellite Telemetry Dashboard
 
 ## Setup and Deployment
->> docker compose build --no-cache
->> docker compose up -d (detached)
+```bash
+docker compose build --no-cache
+docker compose up -d (detached)
+```
 
 ## Teardown
->>docker compose down (maintains persistent database entries)
->>docker compose down -v (deletes persistent database)
+```bash
+docker compose down (maintains persistent database entries)
+docker compose down -v (deletes persistent database)
+```
 
 (could also use Makefile for shortcuts)
 
@@ -18,6 +22,7 @@ For live testing follow the Docker deployment instructions above and navigate to
 To test the REST endpoints directly, use url http://localhost:8000 (API docs are hosted at http://localhost:8000/docs)
 
 Examples:
+```bash
 curl -X POST http://localhost:8000/telemetry \
   -H "Content-Type: application/json" \
   -d '{
@@ -32,6 +37,7 @@ curl "http://localhost:8000/telemetry"
 curl "http://localhost:8000/telemetry?satelliteId=SAT-001&status=healthy"
 curl http://localhost:8000/telemetry/1
 curl -X DELETE http://localhost:8000/telemetry/1
+```
 
 
 ## BackEnd Dev Notes

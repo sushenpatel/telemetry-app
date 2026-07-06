@@ -10,8 +10,10 @@ Once app is running, visit http://localhost:8000/docs for API usage documentatio
 ## Testing
 First install uv
 
->> cd telemetry-api
->> uv run pytest
+```bash
+cd telemetry-api
+uv run pytest
+```
 
 ## Note: Backend CORS
 

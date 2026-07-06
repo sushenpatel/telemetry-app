@@ -6,9 +6,11 @@ ground-station console (deep-space palette, monospace data readouts, LED-style h
 See README at top level telemetry-api directory for deployment via docker compose
 
 # Frontend only
->> cd telemetry-client
->> npm install
->> npm run dev
+```bash
+cd telemetry-client
+npm install
+npm run dev
+```
 
 The app runs at `http://localhost:5173` and talks to the FastAPI backend at
 `http://localhost:8000` (see `src/api/telemetryApi.ts` — change `API_BASE_URL` if it differs).
@@ -16,5 +18,7 @@ The app runs at `http://localhost:5173` and talks to the FastAPI backend at
 ## Testing
 A lite unit test suite (Vitest + React Testing Library) covers the key pieces:
 
->> npm run test        # single run
->> npm run test:watch  # watch mode
+```bash
+npm run test        # single run
+npm run test:watch  # watch mode
+```
