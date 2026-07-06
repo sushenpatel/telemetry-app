@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { AddTelemetryForm } from "./components/AddTelemetryForm";
 import { FilterBar } from "./components/FilterBar";
 import { TelemetryTable } from "./components/TelemetryTable";
+import { useDebouncedValue } from "./hooks/useDebouncedValue";
 import { useTelemetry } from "./hooks/useTelemetry";
 import { EMPTY_FILTERS, type TelemetryFilters } from "./types";
 
@@ -25,13 +26,9 @@ export default function App() {
   } = useTelemetry();
 
   const [filters, setFilters] = useState<TelemetryFilters>(EMPTY_FILTERS);
-  const [debouncedFilters, setDebouncedFilters] = useState<TelemetryFilters>(EMPTY_FILTERS);
 
   // Debounce so the satellite ID text field doesn't fire a request per keystroke.
-  useEffect(() => {
-    const handle = setTimeout(() => setDebouncedFilters(filters), FILTER_DEBOUNCE_MS);
-    return () => clearTimeout(handle);
-  }, [filters]);
+  const debouncedFilters = useDebouncedValue(filters, FILTER_DEBOUNCE_MS);
 
   // Filtering is server-side (GET /telemetry?satelliteId=&status=), so any change to the
   // debounced filters means we restart pagination from offset 0 with the new filters.

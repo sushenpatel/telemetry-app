@@ -34,8 +34,8 @@ class TelemetryEntry(BaseModel):
 
     @field_validator("altitude", "velocity")
     @classmethod
-    def check_valid(cls, value: int) -> int:
-        if value < 0:
+    def check_valid(cls, value: float) -> float:
+        if value <= 0:
             raise ValueError("Altitude and Velocity must be positive numbers.")
         return value
 

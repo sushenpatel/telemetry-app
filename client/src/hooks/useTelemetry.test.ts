@@ -139,7 +139,7 @@ describe("useTelemetry", () => {
     expect(fetchTelemetryPage).toHaveBeenLastCalledWith(0, 50, filters);
   });
 
-  it("surfaces an error and does not refetch when adding an entry fails", async () => {
+  it("returns the error message (and leaves the global banner untouched) when adding fails", async () => {
     fetchTelemetryPage.mockResolvedValue({
       items: [],
       total: 0,
@@ -168,9 +168,11 @@ describe("useTelemetry", () => {
       );
     });
 
+    // The failure is returned to the caller (the form shows it inline) rather than
+    // pushed to the global error banner, which is reserved for load/list/delete errors.
     expect(outcome).toEqual({ ok: false, message: "Satellite ID already exists" });
     expect(fetchTelemetryPage).not.toHaveBeenCalled();
-    await waitFor(() => expect(result.current.error).toBe("Satellite ID already exists"));
+    expect(result.current.error).toBeNull();
   });
 
   it("removes a deleted entry from state and decrements the total", async () => {

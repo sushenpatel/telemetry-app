@@ -90,8 +90,11 @@ export function useTelemetry() {
         await loadFirstPage(activeFilters);
         return { ok: true as const };
       } catch (err) {
+        // Add failures surface inline in the form via the returned message. The
+        // global error banner is reserved for load/list/delete failures, so we
+        // deliberately don't setError() here — otherwise the same message shows
+        // up twice (banner + under the form).
         const message = getApiErrorMessage(err, "Failed to create telemetry entry");
-        setError(message);
         return { ok: false as const, message };
       } finally {
         setIsSubmitting(false);

@@ -1,4 +1,6 @@
 import { HEALTH_STATUSES, type TelemetryFilters } from "../types";
+import { statusLabel } from "../lib/status";
+import { Field, Select, TextInput } from "./FormControls";
 
 interface FilterBarProps {
   filters: TelemetryFilters;
@@ -7,11 +9,6 @@ interface FilterBarProps {
   totalMatches: number;
   loadedCount: number;
 }
-
-const inputClasses =
-  "w-full rounded-md border border-space-600 bg-space-900 px-2.5 py-1.5 text-sm text-ink-100 placeholder:text-ink-500/60 font-mono focus:outline-none focus:ring-2 focus:ring-signal-cyan/40 focus:border-signal-cyan/50";
-
-const labelClasses = "mb-1 block text-[11px] font-medium uppercase tracking-wider text-ink-500";
 
 export function FilterBar({ filters, onChange, onClear, totalMatches, loadedCount }: FilterBarProps) {
   const set = <K extends keyof TelemetryFilters>(key: K, value: TelemetryFilters[K]) =>
@@ -39,31 +36,27 @@ export function FilterBar({ filters, onChange, onClear, totalMatches, loadedCoun
       </div>
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:max-w-md">
-        <div>
-          <label className={labelClasses}>Satellite ID</label>
-          <input
-            className={inputClasses}
+        <Field label="Satellite ID">
+          <TextInput
             placeholder="e.g. SAT-07"
             value={filters.satelliteId}
             onChange={(e) => set("satelliteId", e.target.value)}
           />
-        </div>
+        </Field>
 
-        <div>
-          <label className={labelClasses}>Health status</label>
-          <select
-            className={inputClasses}
+        <Field label="Health status">
+          <Select
             value={filters.status}
             onChange={(e) => set("status", e.target.value as TelemetryFilters["status"])}
           >
             <option value="">All statuses</option>
             {HEALTH_STATUSES.map((s) => (
               <option key={s} value={s}>
-                {s[0].toUpperCase() + s.slice(1)}
+                {statusLabel(s)}
               </option>
             ))}
-          </select>
-        </div>
+          </Select>
+        </Field>
       </div>
     </div>
   );

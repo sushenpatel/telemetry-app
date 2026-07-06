@@ -1,5 +1,9 @@
 import { useState } from "react";
 import { HEALTH_STATUSES, type CreateTelemetryPayload, type HealthStatus } from "../types";
+import { toIsoString } from "../lib/date";
+import { statusLabel } from "../lib/status";
+import { Field, Select, TextInput } from "./FormControls";
+import { Spinner } from "./Spinner";
 
 interface AddTelemetryFormProps {
   onSubmit: (payload: CreateTelemetryPayload) => Promise<{ ok: boolean; message?: string }>;
@@ -24,10 +28,11 @@ const EMPTY_FORM: FormState = {
 
 type FormErrors = Partial<Record<keyof FormState, string>>;
 
-function toIsoString(datetimeLocal: string): string | null {
-  const date = new Date(datetimeLocal);
-  if (Number.isNaN(date.getTime())) return null;
-  return date.toISOString();
+function validateNumber(value: string, label: string): string | undefined {
+  if (value === "") return `${label} is required.`;
+  if (Number.isNaN(Number(value))) return `${label} must be a number.`;
+  if (Number(value) <= 0) return `${label} must be positive.`;
+  return undefined;
 }
 
 function validate(form: FormState): FormErrors {
@@ -43,21 +48,11 @@ function validate(form: FormState): FormErrors {
     errors.timestamp = "Enter a valid date and time.";
   }
 
-  if (form.altitude === "") {
-    errors.altitude = "Altitude is required.";
-  } else if (Number.isNaN(Number(form.altitude))) {
-    errors.altitude = "Altitude must be a number.";
-  } else if (Number(form.altitude) < 0) {
-    errors.altitude = "Altitude cannot be negative.";
-  }
+  const altitudeError = validateNumber(form.altitude, "Altitude");
+  if (altitudeError) errors.altitude = altitudeError;
 
-  if (form.velocity === "") {
-    errors.velocity = "Velocity is required.";
-  } else if (Number.isNaN(Number(form.velocity))) {
-    errors.velocity = "Velocity must be a number.";
-  } else if (Number(form.velocity) < 0) {
-    errors.velocity = "Velocity cannot be negative.";
-  }
+  const velocityError = validateNumber(form.velocity, "Velocity");
+  if (velocityError) errors.velocity = velocityError;
 
   if (!form.status) {
     errors.status = "Select a health status.";
@@ -65,11 +60,6 @@ function validate(form: FormState): FormErrors {
 
   return errors;
 }
-
-const inputClasses =
-  "w-full rounded-md border bg-space-900 px-2.5 py-1.5 text-sm text-ink-100 placeholder:text-ink-500/60 font-mono focus:outline-none focus:ring-2 focus:ring-signal-cyan/40";
-
-const labelClasses = "mb-1 block text-[11px] font-medium uppercase tracking-wider text-ink-500";
 
 export function AddTelemetryForm({ onSubmit, isSubmitting }: AddTelemetryFormProps) {
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
@@ -108,79 +98,66 @@ export function AddTelemetryForm({ onSubmit, isSubmitting }: AddTelemetryFormPro
     }
   };
 
-  const fieldClasses = (field: keyof FormState) =>
-    `${inputClasses} ${errors[field] ? "border-signal-red/60 focus:ring-signal-red/40" : "border-space-600 focus:border-signal-cyan/50"}`;
-
   return (
     <form onSubmit={handleSubmit} className="rounded-lg border border-space-600 bg-space-800/60 p-4 shadow-panel">
       <h2 className="mb-3 font-mono text-xs uppercase tracking-widest text-ink-500">Log New Reading</h2>
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
-        <div>
-          <label className={labelClasses}>Satellite ID</label>
-          <input
-            className={fieldClasses("satelliteId")}
+        <Field label="Satellite ID" error={errors.satelliteId}>
+          <TextInput
+            hasError={!!errors.satelliteId}
             placeholder="SAT-07"
             value={form.satelliteId}
             onChange={(e) => set("satelliteId", e.target.value)}
           />
-          {errors.satelliteId && <p className="mt-1 text-xs text-signal-red">{errors.satelliteId}</p>}
-        </div>
+        </Field>
 
-        <div>
-          <label className={labelClasses}>Timestamp</label>
-          <input
+        <Field label="Timestamp" error={errors.timestamp}>
+          <TextInput
             type="datetime-local"
             step="1"
-            className={fieldClasses("timestamp")}
+            hasError={!!errors.timestamp}
             value={form.timestamp}
             onChange={(e) => set("timestamp", e.target.value)}
           />
-          {errors.timestamp && <p className="mt-1 text-xs text-signal-red">{errors.timestamp}</p>}
-        </div>
+        </Field>
 
-        <div>
-          <label className={labelClasses}>Altitude (km)</label>
-          <input
+        <Field label="Altitude (km)" error={errors.altitude}>
+          <TextInput
             type="number"
             step="any"
-            className={fieldClasses("altitude")}
+            hasError={!!errors.altitude}
             placeholder="550.2"
             value={form.altitude}
             onChange={(e) => set("altitude", e.target.value)}
           />
-          {errors.altitude && <p className="mt-1 text-xs text-signal-red">{errors.altitude}</p>}
-        </div>
+        </Field>
 
-        <div>
-          <label className={labelClasses}>Velocity (km/s)</label>
-          <input
+        <Field label="Velocity (km/s)" error={errors.velocity}>
+          <TextInput
             type="number"
             step="any"
-            className={fieldClasses("velocity")}
+            hasError={!!errors.velocity}
             placeholder="7.66"
             value={form.velocity}
             onChange={(e) => set("velocity", e.target.value)}
           />
-          {errors.velocity && <p className="mt-1 text-xs text-signal-red">{errors.velocity}</p>}
-        </div>
+        </Field>
 
-        <div>
-          <label className={labelClasses}>Health status</label>
-          <select
-            className={fieldClasses("status")}
+        <Field label="Health status" error={errors.status}>
+          <Select
+            hasError={!!errors.status}
             value={form.status}
             onChange={(e) => set("status", e.target.value as FormState["status"])}
           >
             <option value="">Select status</option>
             {HEALTH_STATUSES.map((s) => (
               <option key={s} value={s}>
-                {s[0].toUpperCase() + s.slice(1)}
+                {statusLabel(s)}
               </option>
             ))}
-          </select>
-          {errors.status && <p className="mt-1 text-xs text-signal-red">{errors.status}</p>}
-        </div>
+          </Select>
+        </Field>
       </div>
 
       <div className="mt-4 flex items-center gap-3">
@@ -189,12 +166,7 @@ export function AddTelemetryForm({ onSubmit, isSubmitting }: AddTelemetryFormPro
           disabled={isSubmitting}
           className="inline-flex items-center gap-2 rounded-md bg-signal-cyan/90 px-4 py-2 text-sm font-semibold text-space-950 transition-colors hover:bg-signal-cyan disabled:cursor-not-allowed disabled:bg-space-600 disabled:text-ink-500"
         >
-          {isSubmitting && (
-            <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
-            </svg>
-          )}
+          {isSubmitting && <Spinner className="h-4 w-4" />}
           {isSubmitting ? "Logging..." : "Log entry"}
         </button>
 

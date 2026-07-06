@@ -19,7 +19,8 @@ Unit tests for both the backend and front end (see README's in each respective d
 
 For live testing follow the Docker deployment instructions above and navigate to http://localhost:5173 in a local browser. This will allow you to manually enter telemetry data records and see them populate in the Telemetry table and perform various actions to exercise the backend REST API calls and front end functionality from the requirements.
 
-To test the REST endpoints directly, use url http://localhost:8000 (API docs are hosted at http://localhost:8000/docs)
+To test the REST endpoints directly, use url http://localhost:8000 (API docs are hosted at http://localhost:8000/docs).
+A test script could be used to load the database with a large number of entries to test frontend scrolling and accuracy.
 
 Examples:
 ```bash

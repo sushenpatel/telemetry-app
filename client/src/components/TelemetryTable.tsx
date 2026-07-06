@@ -1,6 +1,8 @@
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { SortDirection, SortState, SortableColumn, TelemetryEntry } from "../types";
+import { formatTimestamp } from "../lib/date";
+import { Spinner } from "./Spinner";
 import { StatusBadge } from "./StatusBadge";
 
 interface TelemetryTableProps {
@@ -27,20 +29,6 @@ const COLUMNS: { key: SortableColumn; label: string; align?: "right" }[] = [
   { key: "velocity", label: "Velocity (km/s)", align: "right" },
   { key: "status", label: "Health Status" },
 ];
-
-function formatTimestamp(iso: string): string {
-  const date = new Date(iso);
-  if (Number.isNaN(date.getTime())) return iso;
-  return date.toLocaleString(undefined, {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-    hour12: false,
-  });
-}
 
 function compareEntries(a: TelemetryEntry, b: TelemetryEntry, column: SortableColumn): number {
   switch (column) {
@@ -81,24 +69,6 @@ function TrashIcon() {
         strokeLinecap="round"
         strokeLinejoin="round"
       />
-    </svg>
-  );
-}
-
-function Spinner() {
-  return (
-    <svg className="h-5 w-5 animate-spin text-signal-cyan" viewBox="0 0 24 24" fill="none">
-      <circle className="opacity-20" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-      <path className="opacity-80" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
-    </svg>
-  );
-}
-
-function SpinnerSmall() {
-  return (
-    <svg className="h-3.5 w-3.5 animate-spin" viewBox="0 0 24 24" fill="none">
-      <circle className="opacity-20" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-      <path className="opacity-80" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
     </svg>
   );
 }
@@ -177,14 +147,13 @@ export function TelemetryTable({
             <button
               key={col.key}
               onClick={() => handleSort(col.key)}
-              className={`flex items-center gap-1 transition-colors hover:text-ink-100 ${
-                col.align === "right" ? "justify-end text-right" : "text-left"
-              } ${isActive ? "text-signal-cyan" : ""}`}
               title={`Sort by ${col.label}`}
+              className={`flex items-center gap-1 transition-colors hover:text-ink-100 ${
+                col.align === "right" ? "flex-row-reverse justify-end text-right" : "text-left"
+              } ${isActive ? "text-signal-cyan" : ""}`}
             >
-              {col.align === "right" && <SortIcon direction={isActive ? sort.direction : undefined} active={isActive} />}
               <span>{col.label}</span>
-              {col.align !== "right" && <SortIcon direction={isActive ? sort.direction : undefined} active={isActive} />}
+              <SortIcon direction={isActive ? sort.direction : undefined} active={isActive} />
             </button>
           );
         })}
@@ -199,7 +168,7 @@ export function TelemetryTable({
       >
         {isInitialLoading ? (
           <div className="flex h-full items-center justify-center gap-2 text-ink-500">
-            <Spinner />
+            <Spinner className="h-5 w-5 text-signal-cyan" />
             <span className="font-mono text-sm">Acquiring telemetry feed...</span>
           </div>
         ) : sortedRows.length === 0 ? (
@@ -237,7 +206,7 @@ export function TelemetryTable({
                       title="Delete entry"
                       className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-space-600 bg-space-900/60 text-ink-300 transition-colors hover:border-signal-red/50 hover:text-signal-red disabled:cursor-wait"
                     >
-                      {isDeleting ? <SpinnerSmall /> : <TrashIcon />}
+                      {isDeleting ? <Spinner className="h-3.5 w-3.5" /> : <TrashIcon />}
                     </button>
                   </div>
                 </div>
@@ -248,7 +217,7 @@ export function TelemetryTable({
 
         {!isInitialLoading && isFetchingNextPage && (
           <div className="flex items-center justify-center gap-2 border-t border-space-700/60 py-3 text-ink-500">
-            <Spinner />
+            <Spinner className="h-5 w-5 text-signal-cyan" />
             <span className="font-mono text-xs">Fetching next batch...</span>
           </div>
         )}
