@@ -1,12 +1,36 @@
 services:
   telemetry-api:
-    build: .
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
     container_name: telemetry-api
     ports:
       - "8000:8000"
     volumes:
-      - telemetry-data:/app/src  # persists the SQLite file across restarts
+      - telemetry-db-data:/app/data
+    environment:
+      TELEMETRY_DB_PATH: /app/data/telemetry.db
     restart: unless-stopped
 
+  telemetry-client:
+    container_name: telemetry-client
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+      args:
+        # Baked in at build time — this is the URL the *browser* will call,
+        # so it must be reachable from wherever the user's browser runs, not
+        # just from inside the docker network (localhost:8000 works for local
+        # docker-compose since the backend port is published to the host).
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-http://localhost:8000}
+    ports:
+      - "5173:80"
+    depends_on:
+      - telemetry-api
+
+    restart: unless-stopped
+    #environment:
+    #  - VITE_API_URL=http://localhost:8000
+
 volumes:
-  telemetry-data:
+  telemetry-db-data:

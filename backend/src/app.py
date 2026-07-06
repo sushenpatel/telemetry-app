@@ -17,7 +17,6 @@ async def lifespan(app: FastAPI):
     init_db()
     yield
 
-
 app = FastAPI(title="Satellite Telemetry API", lifespan=lifespan)
 
 # Allows cross-origin requests from front end which is on a different port
@@ -37,7 +36,6 @@ async def db_connection_middleware(request, call_next):
         if not db.is_closed():
             db.close()
     return response
-
 
 
 @app.get("/telemetry", response_model=PaginatedTelemetryResponse)
@@ -61,6 +59,7 @@ def get_telemetry(
         "offset": offset,
         "items": [entry.to_dict() for entry in results],
     }
+
 
 @app.get("/telemetry/{entry_id}", response_model=TelemetryResponse)
 def get_telemetry_by_id(entry_id: int):
